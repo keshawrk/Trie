@@ -1,90 +1,82 @@
 import java.util.*;
 
-class TrieNode {
-    TrieNode[] links = new TrieNode[26];
-    boolean isEnd = false;
-    boolean containsKey(char ch) {
-        return links[ch - 'a'] != null;
-    }
-    TrieNode get(char ch) {
-        return links[ch - 'a'];
-    }
-    void put(char ch, TrieNode node) {
-        links[ch - 'a'] = node;
-    }
-    void setEnd() {
-        isEnd = true;
-    }
-    boolean isEnd() {
-        return isEnd;
-    }
-}
-
 class Trie {
-    TrieNode root = new TrieNode();
+    static class Node {
+        Node[] links = new Node[26];
+        boolean isEnd;
+
+        boolean has(char ch) {
+            return links[ch - 'a'] != null;
+        }
+
+        Node get(char ch) {
+            return links[ch - 'a'];
+        }
+
+        void put(char ch, Node node) {
+            links[ch - 'a'] = node;
+        }
+    }
+
+    private final Node root = new Node();
 
     public void insert(String word) {
-        TrieNode node = root;
-        for(int i=0;i<word.length();i++) {
-            char ch = word.charAt(i);
-            if(!node.containsKey(ch)) node.put(ch,new TrieNode());
+        Node node = root;
+        for (char ch : word.toCharArray()) {
+            if (!node.has(ch)) node.put(ch, new Node());
             node = node.get(ch);
         }
-        node.setEnd();
+        node.isEnd = true;
     }
 
     public boolean search(String word) {
-        TrieNode node = root;
-        for(int i=0;i<word.length();i++) {
-            char ch = word.charAt(i);
-            if(!node.containsKey(ch)) return false;
+        Node node = root;
+        for (char ch : word.toCharArray()) {
+            if (!node.has(ch)) return false;
             node = node.get(ch);
         }
-        return node.isEnd();
+        return node.isEnd;
     }
 
     public List<String> getAllWords() {
         List<String> res = new ArrayList<>();
-        dfs(root,"",res);
+        dfs(root, "", res);
         return res;
     }
 
     public List<String> getWordsWithPrefix(String prefix) {
         List<String> res = new ArrayList<>();
-        TrieNode node = root;
-        for(int i=0;i<prefix.length();i++) {
-            char ch = prefix.charAt(i);
-            if(!node.containsKey(ch)) return res;
+        Node node = root;
+        for (char ch : prefix.toCharArray()) {
+            if (!node.has(ch)) return res;
             node = node.get(ch);
         }
-        dfs(node,prefix,res);
+        dfs(node, prefix, res);
         return res;
     }
 
-    private void dfs(TrieNode node,String path,List<String> res) {
-        if(node.isEnd()) res.add(path);
-        for(char ch='a';ch<='z';ch++) {
-            if(node.containsKey(ch)) dfs(node.get(ch),path+ch,res);
+    private void dfs(Node node, String path, List<String> res) {
+        if (node.isEnd) res.add(path);
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+            if (node.has(ch)) dfs(node.get(ch), path + ch, res);
         }
     }
 }
 
-class Main{
-    public static void main(String Args[]){
+public class Main {
+    public static void main(String[] args) {
         Trie trie = new Trie();
-        String[] words = {"abc","abcd","abcde","fsfsdfsd","harshith"};
-        for(String word : words) trie.insert(word);
-        if(trie.search("abc")) System.out.println("true");
-        else System.out.println("false");
-        List<String>allWords = trie.getAllWords();
-        List<String>prefixWords = trie.getWordsWithPrefix("abc");
-        for(String word:allWords){
-            System.out.print(word+" ");
-        }
+        String[] words = {"abc", "abcd", "abcde", "fsfsdfsd"};
+        for (String word : words) trie.insert(word);
+
+        System.out.println(trie.search("abc") ? "true" : "false");
+
+        List<String> allWords = trie.getAllWords();
+        List<String> prefixWords = trie.getWordsWithPrefix("abc");
+
+        allWords.forEach(w -> System.out.print(w + " "));
         System.out.println();
-        for(String word:prefixWords){
-            System.out.print(word+" ");
-        }
+        prefixWords.forEach(w -> System.out.print(w + " "));
         System.out.println();
     }
 }
